@@ -3,10 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的个人网站</title>
+    <title>Personal Workspace | Signal Processing & Information Theory</title>
+    <style>
+        :root {
+            --bg-color: #090a0f;
+            --text-primary: #e0e0e0;
+            --accent-color: #00ffcc;
+            --accent-glow: rgba(0, 255, 204, 0.6);
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Consolas', 'Courier New', monospace;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 动态波形背景容器 */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* 主体内容区 */
+        .content {
+            position: relative;
+            z-index: 1;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            letter-spacing: 3px;
+            color: #ffffff;
+            text-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        /* 打字机动画效果 */
+        .typing-container {
+            display: inline-block;
+        }
+
+        .typing-text {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            border-right: 2px solid var(--accent-color);
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 3.5s steps(50, end), blink-caret .75s step-end infinite;
+        }
+
+        /* 标签页设计 */
+        .tags {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 3rem;
+            max-width: 800px;
+        }
+
+        .tag {
+            border: 1px solid var(--accent-color);
+            padding: 8px 18px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            color: var(--accent-color);
+            background: rgba(0, 255, 204, 0.05);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            cursor: default;
+        }
+
+        .tag:hover {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        /* 底部信息区 */
+        footer {
+            position: relative;
+            z-index: 1;
+            padding: 25px;
+            text-align: center;
+            background: linear-gradient(to top, rgba(9, 10, 15, 1) 0%, rgba(9, 10, 15, 0) 100%);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .contact-info {
+            font-size: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            color: #888;
+        }
+
+        .contact-info span.highlight {
+            color: #ccc;
+        }
+
+        .contact-info a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .contact-info a:hover {
+            color: #ffffff;
+            text-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        /* 动画关键帧 */
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--accent-color); }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 600px) {
+            h1 { font-size: 2.2rem; }
+            .typing-text { font-size: 0.9rem; animation: none; border-right: none; white-space: normal; }
+            .contact-info { flex-direction: column; gap: 10px; }
+        }
+    </style>
 </head>
 <body>
-    <h1>你好，世界！</h1>
-    <p>欢迎来到我的第一个个人网站。这里是使用 GitHub Pages 搭建的。</p>
+
+    <div id="canvas-container">
+        <canvas id="signalCanvas"></canvas>
+    </div>
+
+    <div class="content">
+        <h1>Welcome to My Space</h1>
+        <div class="typing-container">
+            <div class="typing-text">Initializing parameters... Modeling the composite signal vector.</div>
+        </div>
+        
+        <div class="tags">
+            <span class="tag">Statistical Signal Processing</span>
+            <span class="tag">Information Theory</span>
+            <span class="tag">Wireless Communications</span>
+            <span class="tag">Message Passing Algorithms</span>
+        </div>
+    </div>
+
+    <footer>
+        <div class="contact-info">
+            <span class="highlight">📍 Beijing Institute of Technology (北京理工大学)</span>
+            <span class="separator">|</span>
+            <span class="highlight">🎓 Undergraduate Student</span>
+            <span class="separator">|</span>
+            <span>✉️ <a href="mailto:xieyunheg@gmail.com">xieyunheg@gmail.com</a></span>
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('signalCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let time = 0;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        // 绘制正交/复合信号波形
+        function drawSignal() {
+            ctx.clearRect(0, 0, width, height);
+            
+            ctx.beginPath();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'rgba(0, 255, 204, 0.35)';
+            
+            for (let i = 0; i < width; i++) {
+                // 叠加多个正弦波以模拟复合信号 (Composite Signal)
+                const y = height / 2 
+                        + Math.sin(i * 0.008 + time) * 60 
+                        + Math.sin(i * 0.02 - time * 1.2) * 30
+                        + Math.cos(i * 0.004 + time * 0.8) * 90;
+                
+                if (i === 0) {
+                    ctx.moveTo(i, y);
+                } else {
+                    ctx.lineTo(i, y);
+                }
+            }
+            
+            ctx.stroke();
+            time += 0.015; // 波形演进速度
+            requestAnimationFrame(drawSignal);
+        }
+
+        drawSignal();
+    </script>
 </body>
 </html>
